@@ -1,0 +1,14 @@
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-xc++"
+    - "-Werror"
+    - "-Wall"
+    - "-Wshadow"
+    - "-Wunreachable-code"
+    - "-pedantic"
+    - "-I/usr/include/llvm"
+    - "-I/home/eclipse/projects/Luna/liblunac/include"
+Diagnostics:
+  MissingIncludes: Strict
+  UnusedIncludes: Strict

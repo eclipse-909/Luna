@@ -1,0 +1,7 @@
+[book]
+authors = ["Ethan Morton"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Luna Book"
+description = "Guide for the Luna language"

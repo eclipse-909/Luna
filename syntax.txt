@@ -1,0 +1,1184 @@
+//This is a proposed syntax for a language I would like to eventually create.
+//None of this syntax is final, and standard library naming conventions are not final.
+//There may be some mistakes and contradictions in this file since there is not yet a compiler
+//to tell me where I've made mistakes. You can probably see inspiration from Jai, Rust, C, and Zig.
+//I'm trying to be exhaustive, but it's hard to think of every example and counter-example.
+//I'm going to leave out as much standard library stuff as possible, and just focus on syntax.
+
+//imports
+
+import std::prelude::*; //imports commonly used things
+import std::thread;
+import std::collections::HashMap as Map;
+import std::math::{
+	Vec2,
+	Vec3,
+	cos,
+	sin
+};
+
+//entry point
+//argv is a slice of string slices
+//a slice is a fat pointer of length + pointer
+//main could also be defined as 'const main = fn() {}' for simplicity
+const main = fn(argv: str[]) => i32 {
+	for arg in argv {
+		//...
+	}
+	func();
+	data_types();
+	_ = control_flow(); //discard the return value
+	0 //return keyword is not necessary
+}
+//programs without an entry point won't compile into an executable, but can compile to a library
+
+//comments
+
+//single-line comment
+/*single-line comment*/ //you can write code here
+/*
+	multi-line
+	comment
+*/
+/*
+	/*
+		nested multi-line comment
+		//redundant "//" inside comment
+	*/
+*/
+
+///Single-line documentation
+///More documentation
+///Formatted with markdown
+//Regular comments are not part of documentation
+const DocumentedStruct = struct {}
+
+/**
+Multi-line documentation
+more documentation
+*/
+const OtherDocStruct = struct {}
+
+//doc comments must be above something that can be documented: struct, function, enum, interface, etc
+//otherwise the code won't compile
+//this could just be a warning, but we want to enforce good documentation when we can
+
+//globals
+
+//global function
+
+const func = fn() {}
+
+const func0 = fn(arg: f32) => u8 {}
+
+const func1 = fn() => void {} // void is the same as no return type
+
+const fn_with_default = fn(arg0: u8, arg1: String = "default string") {
+	//the arguments with defaults must be at the end.
+	//This function can be called like
+	//fn_with_default(10);
+	//fn_with_default(10, "override");
+	//fn_with_default(arg0 = 10); //you can name the argument when calling the function
+	//fn_with_default(10, arg1 = "override");
+	//fn_with_default(arg0 = 10, "override");
+	//fn_with_default(arg0 = 10, arg1 = "override");
+	//fn_with_default(arg1 = "override", arg0 = 10); //named arguments can be passed in any order
+}
+
+//This won't compile since the default arguments aren't at the end.
+//const invalid_fn_with_default = fn(arg0: u8 = 0, arg1: String) {}
+
+const data_types = fn() {
+	//primitives
+
+	//bool
+	var my_bool: bool = true;
+	
+	//integer types
+	var my_i8: i8 = 0;
+	var my_i16: i16 = 0;
+	var my_i32: i32 = 0;
+	var my_i64: i64 = 0;
+	var my_i128: i128 = 0;
+	var my_isize: isize = 0; //size of system pointer
+
+	var my_u8: u8 = 0;
+	var my_u16: u16 = 0;
+	var my_u32: u32 = 0;
+	var my_u64: u64 = 0;
+	var my_u128: u128 = 0;
+	var my_usize: usize = 0; //size of system pointer
+
+	//float types
+	var my_f32: f32 = 0;
+	var my_f64: f64 = 0;
+
+	//text types (UTF-8)
+	var my_char: char = 'a'; //always 4 bytes
+	var my_str: str = "abc"; //str is a wrapper around u8[] - (->u8, usize) for pointer and length
+	var my_string: String = String::from("def");	//String is a wrapper around DynArr<u8> - (->u8, usize, usize) for pointer, length, and capacity.
+
+	//interop with C string
+	var my_c_string: ->char = "Hello, World!"; //null-terminator is automatically inserted at the end ONLY when the type is a literal ->char string
+	var default_str = "I'm a str, not a String or ->char";
+
+	//function pointer
+	var my_fn0: fn() = fn() {};
+	var my_fn1: fn(u8, f32) = fn(arg0: u8, arg1: f32) {};
+	var my_fn2: fn() = func;
+	var increment = fn(i32) => i32 {
+		num += 1;
+		num
+	};
+	var new_i32 = increment(my_i32);
+
+	//capture groups
+	//Globally and locally defined functions can have capture groups.
+	//A global function with a capture group can only capture other global variables.
+	//
+	var capture = fn() [my_u8, ->my_u16] => u8 {
+		//my_u8 is copied into this function because it's a u8, and u8s are always copied instead of moved
+		//my_u16 is a pointer to the original my_u16
+		//use them in this function
+		my_u16.* as u8 + my_u8 //the pointer needs to be dereferenced before the u16 can be cast to a u8.
+							   //Pointers cannot be directly cast to u8, it would not compile.
+							   //pointers can be cast to usize, so make sure to dereference the pointer if casting to usize.
+							   //If you need to, you could do 'my_u16 as usize as u8', but I'm not sure why you would need to do this
+	};
+
+	//types can be inferred by the compiler
+	other_str := "ghi"; //str
+	other_int := 0; //defaults to i32;
+	other_float := 0.0; //defaults to f32;
+	other_fn := fn() {}; //fn()
+
+	//arrays and slices
+	my_arr: [u8; 5] = [0, 1, 2, 3, 4]; //stack allocated
+	my_arr1 := [0; 5]; //array initialized to 5 zeros
+	my_arr2: [u8; 5] = [_; 5]; array of length 5 uninitialized
+	my_slice0: [u8] = my_arr[0..2]; //pointer to [0, 1] and length of 2
+	my_slice1: [u8] = my_arr[0..=2]; //->[0, 1, 2] & len 3
+	my_slice2: [u8] = my_arr[2..]; //->[2, 3, 4] & len 3
+	my_slice3: [u8] = my_arr[..2]; //->[0, 1] & len 2
+
+	//pointers
+	my_ptr: ->u8 = &my_u8; //& means "address of"
+	new_u8: u8 = my_ptr->; //var_name-> means dereference
+	nullable_ptr: ?->u8 = null;	//? means that the type may or may not contain a value.
+											//This works for everything, not just pointers.
+											//?-> has the same size/align of ->
+	my_struct := MyStruct {
+		field0: 0,
+		field1: 0,
+		field2: Variant0,
+		field3: null
+	};
+	struct_ptr: ->MyStruct = &my_struct; //taking the address of a type that implements Raii will still return a regular pointer
+										 //this is because pointers never use Raii, so there's no point in annotating with '!'
+
+	//pointers can automatically be dereferenced
+	field0_copy := struct_ptr.field0;
+	//non-typed pointer
+	void_ptr: ->void = struct_ptr as ->void;
+
+	//optional
+	optional_u8: ?u8 = null;
+	optional_f32: ?f32 = 0;
+	//optional pointers (?->) have the same layout as a regular pointer (->)
+	//all optional types are represented by a tagged union in memory unless specified otherwise
+	//kind of like this:
+	// Option :: enum<T>: u8 {
+	//		Null,
+	//		Some(T)
+	// }
+
+	//mutability
+	//the compiler can infer whether a variable should be mutable based on its usage.
+	//you can specify 'const' or 'mut' to enforce a compile-time restriction.
+	mut_int: mut i32 = 0; //value can be changed
+	const_int: const i32 = 0; //value cannot be changed
+	mut_ptr_mut_value: mut ->mut i32 = &mut_int; //pointer and value it points to can be changed
+	mut_ptr_const_value: mut ->const i32 = &const_int; //pointer can be changed but value it points to cannot
+	const_ptr_mut_value: const ->mut i32 = &mut_int; //pointer cannot be changed but value it points to can
+	const_ptr_const_value: const ->const i32 = &const_int; //pointer and value it points to cannot be changed
+	//a pointer to a const value cannot be assigned the address of a mutable variable
+	// invalid_ptr: -> const i32 = &mut_int; //this won't compile
+
+	mut_my_struct := MyStruct {_};
+	const_my_struct := mut_my_struct; //mutable objects can be moved into const variables
+
+	//casting
+	//most primitives can be cast
+	cast_u16: u16 = my_u8 as u16;
+	void_my_struct: ->void = struct_ptr as ->void;
+	const_ptr_const_value as const ->mut u8-> = 5;	//You can cast from const to mut if you really need to, but the compiler will treat it as if it was always mutable.
+													//The compiler will warn you and tell you to change the type declaration,
+													//unless the type came from some library, in which case no warning will be generated.
+
+	//tuple
+	my_tuple := (1, "Hello, World", 1.5); //can hold 2+ items of any type
+	tuple_int := my_tuple.0;
+	tuple_str := my_tuple.1;
+	tuple_float := my_tuple.2;
+}
+
+//optional, watered-down borrow-checker
+ownership :: fn() => i32 {
+	//ownership, moving, and borrowing are mandatory in Rust unless you explicitly copy everything.
+	//Here, ownership and moving are the default, but it's easy to copy things if you need to.
+	x := OtherStruct {_};
+	y:; //this is the same as 'y := _;'
+
+	//copying
+	//This copies the value of the variable.
+	//This is just a bit-wise copy of the stack value.
+	y =: x; //you can still use x.
+	//the ':' copies a variable, so this is really a regular assignment but with a copied value
+	//y = :x;
+	//if you want to pass a value into the function by copying, you can just do
+	//my_func(:x);
+
+	//moving
+	//The value of one variable can be moved into another variable,
+	//and the first variable cannot be used.
+	y = x;	//moved out of x and into y.
+				//y owns the value and x cannot be used anymore.
+
+	//borrowing is just pointers
+	y_ref: ->i32 = &y;	//lifetimes are not strictly enfored,
+								//but the compiler may warn you if there's a potential use-after-free
+
+	y_mut_ref: ->mut i32 = &y; //you are not restricted on how many mut or const pointers you want to have at the same time.
+
+	//moving/copying/borrowing values passed into functions
+	a := OtherStruct {_};
+	b := 2;
+	c := 3;
+	move_copy_borrow(a, b, &c);
+	//cannot use a because it was moved into the function.
+	//can use b and c because they were not moved.
+
+	//function capture groups
+	d := OtherStruct {_};
+	capture := fn() [d, b, ->c] { //variable must be listed in capture group to use it in function body
+		//d is moved, b is copied, c is borrowed
+		//If you don't want to move d, you can also make a copy of it before moving it in
+	}
+	//cannot use d because it was moved into function via capture group.
+	//can use b and c because they were not moved.
+
+	y //Returning from a function or scope always moves it, never copies.
+	  //This is because you don't want to accidentally copy an Raii type when returning,
+	  //and you will not use the variable again anyway.
+}
+
+move_copy_borrow :: fn(move: OtherStruct, copy: i32, borrow: ->i32) {
+	//OtherStruct is moved because it's moved on assignment
+	//i32 is copied because it's copied on assignment
+	//->i32 is technically copied since you're actually copying the pointer, which is copy-by-default regardless of what it points to
+
+	//Copy-on-assignment types include:
+	//numerics, bool, char, pointers
+	//str and slices because it just copies the pointer and length, not the data
+
+	//Move-on-assignment types include:
+	//Basically everything else
+	//String and Vec because you can use String::as_str and Vec::as_slice to borrow them
+	//you can still use '=:' to copy on assignment
+
+	//Non-copyable types include:
+	//Raii types because they can cause double-free errors
+	//you cannot use '=:' to copy them
+	//There are ways to get around this if you need to copy instead of move
+	//Smrt::as_ptr copies the underlying pointer
+	//Using '!' like !Smrt makes it copyable:
+	og: Smrt<u8> = Smrt::new(10);
+	copied: !Smrt<u8> =: og; //copied will not have Raii::free called when it goes out of scope
+	//!-types cannot be upgraded back into their regular Raii types
+	//invalid: Smrt<u8> = copied;
+	//invalid: Smrt<u8> =: copied;
+}
+
+//this function can return null or void
+control_flow :: fn() => ?void {
+	condition0 := true;
+	condition1 := false;
+	x := 3;
+
+	//if-else
+
+	//only executes the first block with a true condition.
+	//this is not a match! this will check each condition until it finds one that's true.
+	ifelse {
+		x <= 1 {}
+		condition1 {}
+		x == 2 {}
+		x == 3 {} //only this block is executed
+		x != 10 {}
+		condition0 {}
+		x > 4 {}
+		_ {} //optional 'else' block
+	}
+
+	//you can fallthrough an ifelse block
+	ifelse {
+		x <= 1 {} => //this will fallthrough to the next block
+		condition1 {} //this will not fallthrough again
+		x == 2 {}
+	}
+	//you can only fallthrough if it doesn't return a value
+	no_fallthrough := ifelse {
+		x <= 1 {10} //you can't fallthrough here since you have to return a value in each block
+		condition1 {20}
+		x == 2 {30}
+	};
+
+	//you can also do traditional if-else blocks
+	D := 8;
+	if 8==D {}
+	if condition1 {} else {}
+	if condition1 {} else if condition0 {} else {}
+
+	//if-else expressions can return values
+	conditional_str := if condition0 {"Hello"} else {"World"};
+
+	//pattern matching
+
+	my_enum := MyU8Enum::Variant0;
+
+	//match against all patterns.
+	//this is not an ifelse!
+	//this will use the C-style switch case where the block to execute is determined by caluclating the jump offset
+	match my_enum {
+		Variant0 {}
+		Variant1 {}
+		Variant2 {}
+		Variant3 {}
+		Variant4 {}
+		Variant5 {}
+	}
+
+	//you must match all patterns or use a catch-all
+	match my_enum {
+		Variant0 {}
+		Variant1 {}
+		_ {}
+	}
+
+	//match expressions can return values
+	conditional_str = match my_enum {
+		Variant0 {"Hello"}
+		Variant1 {"World"}
+		_ {"!"}
+	};
+
+	//integers can be matched by ranges
+	match 10 {
+		..=3 {}
+		4 {}
+		5 {}
+		6..8 {}
+		8 {}
+		9.. {}
+	}
+
+	//multiple variants can match to the same block
+	match my_enum {
+		Variant0
+		Variant1
+		Variant2 {}
+		Variant3
+		Variant4
+		Variant5 {}
+	}
+
+	//you can fallthrough from one block to the next
+	match my_enum {
+		Variant0 {} //no fallthrough
+		Variant1 {} => //will fallthrough to Variant2 once finished executing this block
+		Variant2 {} //will not fallthrough again
+		_ {}
+	}
+
+	my_union := MyTaggedUnion::Variant2 {
+		field0: 0,
+		field1: MyStruct {
+			field0: 0,
+			field1: 0,
+			field2: MyRegularEnum::Variant0,
+			field3: null
+		},
+		field2: "Hello, World!"
+	};
+
+	//match with tagged union
+	match my_union {
+		Variant0 {}
+		Variant1 {}
+		Variant2 {field0, field1, field2} {}
+		Variant3(my_struct) {}
+	}
+
+	//fallthrough and multiple-matching is inherently limited with tagged unions.
+	//you can fallthrough from any variant to a tag-only variant.
+	//any fields that were deconstructed cannot be used after the fallthrough
+	match my_union {
+		Variant2 {field0, field1, field2} {} => //this is allowed
+		Variant0 {} //fields 0-2 cannot be used here, even if it fellthrough
+		// Variant1 {} => //this is not allowed because the data does not logically represent a MyStruct
+		Variant1 {} !=> //you can override the compiler if you absolutely need to fallthrough
+		Variant3(my_struct) {} //using my_struct after a fallthrough is undefined behavior
+	}
+	match my_union {
+		Variant2 {field0, field1, field2} //this is allowed
+		Variant0 {} //fields 0-2 cannot be used here, even if it matched
+		// Variant1 //this is not allowed because the data does not logically represent a MyStruct
+		Variant1 ! //you can override the compiler if you absolutely need to match
+		Variant3(my_struct) {} //using my_struct after a fallthrough is undefined behavior
+	}
+
+	//handling optional values
+	optional: ?u8 = null;
+
+	if optional == null {} else {} //optional is implicity cast to its inner type within the else block
+
+	ifelse {
+		optional == null {}
+		_ {} //optional is implicity cast to its inner type within the else block
+	}
+
+	match optional {
+		null {}
+		some_value {} //some_value is the arbitrary identifier for the inner type of optional
+		//or //_ {} //use a catch-all instead of providing a name for the inner value, and optional is cast to the inner type
+	}
+
+	//in functions that return an optional value, you can use the '?' to get the inner value, or return null to the function
+	inner := optional?; //either inner is assigned, or null is returned from the function
+
+	//optional assertions
+	inner1 := optional!; //a runtime assertion is made that optional != null, and inner1 gets the inner value if the assertion passes
+
+	//deconstruction
+
+	//struct
+	my_struct := MyStruct {
+		field0: 0,
+		field1: 0,
+		field2: Variant0,
+		field3: null
+	};
+	MyStruct {field0, field1, field2, field3} := my_struct;
+	//fields used from here until end of scope
+
+	//enum
+	match my_union {
+		Variant2 {e_field0, MyStruct {s_field0, s_field1, s_field2, s_field3}, e_field2} {}
+		Variant3(e_field0, e_field1, e_field2, e_field3) {}
+		_ {}
+	}
+
+	if Variant2 {e_field0, e_field1, e_field2} := my_union {
+		//fields can be used here
+	} else {} //you could do 'else if' and deconstruct more variants
+
+	Variant2 {e_field0, e_field1, e_field2} := my_union else {};
+	//else block must break out of scope via return or panic. If in a loop, you can use continue or break.
+	//fields used from here until end of scope
+
+	ifelse {
+		Variant2 {e_field0, e_field1, e_field2} := my_union {} //fields can be used here
+		//you could add more variants to deconstruct
+		_ {} //optional catch-call
+	}
+
+	//scopes as expressions
+	//any scope can return a value. Just make the return value the last expression in the scope
+	expr_result := {
+		temp := 4;
+		temp += 1;
+		temp
+	}; //expr_result = 5
+
+	//loops
+
+	//loop - infinite loop until it breaks, panics, or returns
+	loop {
+		if expr_result == 10 {break;} //you can break out of a loop
+		expr_result += 1;
+	}
+
+	//break can return a value from the loop's scope
+	loop_result := loop {
+		if expr_result == 20 {break true;}
+		expr_result += 1;
+	}; //this will either break with a value, or it will loop infinitely, so we don't have to worry about a default value
+
+	//break to a label
+	outer: loop {
+		loop {
+			if expr_result % 2 == 0 {break outer;} //this exits the inner and outer loop
+			expr_result += 1;
+		}
+	}
+
+	//breaking to a lable can still return a value
+	nest_result := outer1: loop {
+		loop {
+			if expr_result % 3 == 0 {break outer1 false;} //exits inner and outer loop and returns false to nest_result
+			expr_result += 1;
+		}
+	};
+
+	//same with regular scope expressions
+	block_result := block: {
+		//code...
+		inner_var := {
+			break block 10;
+		}; //inner_var is never assigned
+		//code... this is skipped
+	};
+
+	//in a regular scope expression, break must always break with a label to avoid confusion with loop breaks
+	block1: {
+		//code...
+		inner_var := {
+			break block;
+		}; //inner_var is never assigned
+		//code... this is skipped
+	}
+	//you can't use break in just the function without an additional scope
+	//break;
+	//^^^^^ this is a syntax error since we are in the function and not a nested scope
+
+	//continue
+	loop {
+		if expr_result % 2 == 0 {continue;} //skip the remainder of the body and begin the next iteration in this loop
+		if expr_result % 3 == 0 {break;}
+		expr_result += 1;
+	}
+
+	//continue to label
+	outer2: loop {
+		loop {
+			if expr_result % 2 == 0 {continue outer2;} //skips the rest of the body and starts the next iteration of the outer loop
+			//continue cannot return a value from the loop
+			expr_result += 1;
+		}
+		if expr_result % 3 == 0 {break;}
+	}
+
+	//while loop
+	//loops until the condition is false
+	while expr_result % 2 == 0 {
+		expr_result *= 3;
+	}
+
+	//break value from while loop
+	while_result := while expr_result % 2 == 0 {
+		if expr_result % 10 == 0 {break true;}
+		expr_result += 1;
+	} else {
+		false //an else block must be provided in case the loop exits naturally without breaking
+	};
+	//continues and labels still apply to while loops
+
+	//traditional for loop
+	for i := 0; i < 10; i += 1 {
+		//breaks, continues, and labels work the same as in while-loops
+	}
+
+	//alternate for loop
+	for i in 0..10 {
+		//this is exactly the same as the traditional for loop
+	}
+
+	//you can easily loop over arrays and slices
+	loop_arr := [0, 1, 2, 3, 4];
+	for element in loop_arr {
+		element += 1; //this does not change the value in the array since element is a copy
+	}
+
+	//loop by pointer
+	for ->element in loop_arr {
+		element += 1; //element is automatically dereferenced with the += operator and the value is updated in the array
+	}
+
+	//loop with value and index
+	for ->element, index in loop_arr {
+		element += index;
+	}
+}
+
+import std::alloc::{Sys, Arena};
+memory_allocations :: fn() {
+	//Sys is the global allocator - equivilent to using malloc/free in C
+	heap_u8: ->u8 = Sys::alloc<u8>(10); //generic argument is the type,
+										//and the function argument is the value to be put in that memory.
+										//alloc panics if it fails. Use Sys::try_alloc to return ?->
+
+	heap_struct: ->MyStruct = Sys::alloc(_); //leave the memory uninitialized
+
+	//defer
+	//statements made in defer block will be executed when the block goes out of scope
+	defer {Sys::free(heap_u8);}
+
+	heap_f32 := Sys::alloc(10.0); //generic argments can be inferred
+
+	defer {Sys::free(heap_f32);} //defer statements are executed in reverse order they were called
+								 //so heap_f32 is freed before heap_u8
+
+	//defer can be nested
+	defer {
+		defer {} //this block is executed at the end of the outer defer block, which is executed at the end of the function scope
+		//code...
+	}
+
+	//manual dynamic list
+	cap := 3;
+	len := 0;
+	list_ptr: ->u8 = Sys::alloc_size(cap); //allocate by size in bytes
+
+	//pointers are automatically dereferenced when using + or -, so we can't use math operators on them
+	//instead we use functions like add() and sub()
+	//this may be slightly more annoying in the cases where you have to do it,
+	//but it prevents you from making the mistake of forgetting to dereference the pointer explicity when using math operators
+
+	//pretend we are calling a push function for the list
+	list_ptr-> = 0;
+	len += 1;
+
+	list_ptr.add(1)-> = 1;
+	len += 1;
+
+	list_ptr.add(2)-> = 2;
+	len += 1;
+
+	//now we have to realloc if we want to push one more
+	cap *= 2;
+	list_ptr = Sys::realloc(list_ptr, cap); //realloc will allocate at least the number of bytes specified,
+											//copy the bytes over, and free the previous pointer
+	list_ptr.add(3)-> = 3;
+	len += 1;
+
+	//deallocate the list
+	Sys::free(list_ptr);
+
+	//arenas and custom allocators
+	arena := Arena::new(); //Arena implements Raii, which means it must be moved into the arena variable
+									//Types that implement Raii cannot be copied.
+
+	arena_u8: ->u8 = arena.alloc(_);
+	arena_list: ->u8 = arena.alloc_size(3);
+	arena_list = arena.realloc(arena_list, 6);
+	//arena uses RAII so all memory is freed and all pointers will dangle once arena goes out of scope
+	//any allocated objects that use RAII will NOT have their Raii::free function called on them
+	//this is because pointers do not automatically use Raii::free
+
+	//you may notice that Sys uses "Sys::alloc" as a function, and Arena uses "my_arena.alloc" as a method.
+	//This is because Sys is a 0-sized-struct, and Arena is a non-0-sized-struct.
+	//The declaration for this method is something like:
+	//alloc :: fn<T>(->This, init_value: T) => ->T;
+	//When a struct is 0-sized, you have the option to instantiate it and call the method like:
+	//sys := Sys {};
+	//ptr := sys.alloc(_);
+	//And this works perfectly fine.
+	//However, you also have the option to call it as a function of the type like you've been seeing.
+	//This only works because it's 0-sized.
+
+	//if you want to use Raii with allocators, you have to use Smrt::new() for the Sys allocator
+	//or Smrt::alloc(&my_arena) for a custom allocator, or similar.
+	//this returns a Smrt pointer which calls Raii::free on the underlying pointer
+	smrt_ptr: Smrt<u8> = Smrt::new(10); //allocates a u8 on the heap and initializes it to 10
+	smrt_bytes: Smrt<u8> Smrt::size(64); //allocates 64 bytes on the heap uninitialized
+	//smrt_ptr and smrt_bytes will have Raii::free called on them immediately after they're last used
+
+	//opt-out RAII
+	no_free_struct: !MyStruct = _; //Maybe you don't want to call Raii::free on your object for some reason.
+								   //For example, if your object is uninitialized, it would be very bad.
+								   //Use '!' in front of the type to opt-out of the automatic call to Raii::free.
+
+	//no_free_struct will be cleaned off the stack when it goes out of scope.
+	//If it's responsible for cleaning up memory, you need to manually do that before it goes out of scope.
+	//Or you need to find another way to clean the memory, like if you wanted to copy the pointer or return it from the function,
+	//you could free that memory somewhere outside this function.
+	//Just make sure you know what you're doing.
+
+	//opt-out RAII for Smrt pointers
+	no_free_smrt: !Smrt<u8> = Smrt::new(10); //Smrt pointer can be moved to prevent Raii::free from being called automatically
+	defer Raii::free(no_free_smrt);
+
+	arena_smrt: Smrt<u8> = Smrt::alloc(arena, 10); //use Smrt::alloc to specify the allocator
+	//if you want an unowned Smrt pointer, it makes more sense to get the pointer than to use '!'.
+	arena_ptr: ->u8 = arena_smrt.as_ptr();
+
+	//You can think of '!' as an indicator that this variable is not responsible for cleaning up the memory
+
+	//be careful when copying any Raii object
+	//arena_smrt_copy: Smrt<u8> = arena_smrt; //this will cause a double-free error if you're not careful
+	//it would be better to do this
+	arena_smrt_copy: ->u8 = arena_smrt.as_ptr();
+	//or
+	//arena_smrt_copy: !Smrt<u8> = arena_smrt; //but you should prefer the former
+	//using '!' is better for things like files and sockets rather than Smrt pointers
+
+	unowned_optional_smrt_ptr: !?Smrt<MyStruct> = null; //'!' must always be before '?'
+
+	owned_optional_smrt_ptr: ?Smrt<MyStruct> = null;
+	//When Raii::free is called on this object, it will always check if the pointer is null
+	//before calling free. If you don't want the null-check, you should manually call free
+	//by doing something like this:
+	//Raii::free_unchecked(owned_optional_smrt_ptr);
+	//Just be careful doing this since you might try to free a null-pointer.
+
+	//if you call Raii::free or Raii::free_unchecked on an object manually,
+	//it will not be done again automatically.
+	//this will prevent accidental double-frees
+
+	//opt-out Raii can be used for many types that use Raii.
+	//Files use Raii by default because it just makes more sense, but you can opt-out if you want.
+	file: !File = File::open("/path/to/file.ext");
+	Raii::free(&file); //there is no File::close since that's what Raii::free is supposed to do
+	//not sure why you would ever do this, but you can choose to never close the file if you want to
+
+	//general allocations
+	//Smrt::new uses Sys allocator and Smrt::alloc uses a specified allocator.
+	//This will be a common naming convenion for many types like List::new and List::alloc
+}
+
+compile_time_code :: fn() {}
+
+//variable
+
+global_int0: i32 = 0; //runtime variable
+//or global_int0 := 0;
+global_int1: i32 : 0; //compile-time const variable
+//or global_int1 :: 0;
+global_str :: "Hello";
+
+//struct
+
+//A struct is a composition of other types.
+//Uses C size and alignment properties.
+//Automatically sorts the fields to make it as compact as possible, so this struct becomes:
+	//field3: ->MyStruct,
+	//pub field1: f32,
+	//field0: MyRegularEnum,
+	//field0: u8
+MyStruct :: struct {
+	field0: u8,
+	pub field1: f32, //public fields can be accessed like my_struct.field1 from anywhere in your codebase
+	field2: MyRegularEnum, //fields are private by default and can only be used like this in a method definition
+	field3: ?->MyStruct //nullable pointer
+}
+
+//You can provide default values for structs and enums.
+//You are required to provide a value for all fields in a struct when constructing one,
+//except for fields with default values.
+//Use an underscore to indicate that you want to leave that field with uninitialized memory
+//when the struct is allocated. You do not need to provide that field with a value when constructing it.
+OtherStruct :: struct {
+	field0: u32 = 0,
+	field1: MyStruct = _,
+	field2: f64
+}
+
+//structs can be zero-sized.
+//this can be useful with interfaces (see Sys vs Arena allocations above) and maybe some other stuff
+ZeroSizedStruct :: struct {}
+
+impl ZeroSizedStruct {
+	//this can be called in 2 ways...
+	//First:
+	//zero := ZeroSizedStruct {};
+	//zero.method_or_fn();
+	//Second:
+	//ZeroSizedStruct::method_or_fn();
+	//This also works for fn(this), but not fn(zero: This) or fn(zero: ->This)
+	method_or_fn :: fn(->this) {}
+}
+
+//enum
+
+//Enum with regular variants are just a u32 that autoincrement
+MyRegularEnum :: enum {
+	Variant0, //0
+	Variant1, //1
+	Variant2  //2
+}
+
+//You can specify any integer type or char and it will autoincrement from 0
+MyU8Enum :: enum: u8 {
+	Variant0, //0
+	Variant1, //1
+	Variant2, //2
+	Variant3 :: 10, //you can manually assign the value to a variant
+	Variant4, //11
+	Variant5  //12
+}
+
+//Be careful with negative integers
+MyI8Enum :: enum: i8 {
+	Variant0, //0
+	Variant1 :: -1,
+	// Variant2 //-1 wraps back around to 0, which means this won't compile because you cannot have duplicate values
+}
+
+//You can use any type for an enum: strings, structs, other enums, etc,
+//but every variant needs to be explicitly assigned a compile-time value since it can't autoincrement.
+//This is also more expensive to use in pattern matching, and uses more memory, so only do this if you need to.
+MyStrEnum :: enum: ->str {
+	Variant0 :: "Hello",
+	Variant1 :: "World",
+	Variant2 :: "World"  //since "World" exists in two places in the binary, Variant 1 and 2 are two different pointers
+						//if you had two variants that held the same pointer, it wouldn't compile
+}
+
+//Enums can also be tagged unions.
+//Just like before, the tag can be anything,
+//But variants can hold a tag and a type
+MyTaggedUnion :: enum: u8 {
+	Variant0, //0
+	Variant1, //1
+	Variant2 { //just like struct, the fields are sorted
+		field0: f32,
+		field1: MyStruct,
+		field2: ->str
+	} :: 2,
+	Variant3(pub !MyStruct) :: 3 //syntax is same as tuple (except for pub which is not in tuples and optional in enums)
+}
+
+//union
+
+//only one variant is 'active' at a time.
+//you will need a way to track which one is active.
+//if you just need a tag, then you should use an enum instead.
+//if you have another way to track which one is active and don't need a tag,
+//then you can use a union.
+MyUnion :: union {
+	variant0: u32,
+	variant1: !MyStruct, //unions cannot contain Raii types, so you have to use '!'.
+	variant2: String
+}
+
+//type alias
+
+MyStructAlias :: alias MyStruct;
+MyEnumAlias :: alias MyRegularEnum;
+GenericAlias<T> :: alias GenericStruct<T>; //you can make an alias generic
+SpecializedAlias :: alias GenericStruct<MyU8Enum>; //you can make an alias for a specific generic type
+//you can do structs, enums, interfaces, functions, global variables, other aliases
+
+//interface
+
+//implementing structs/enums must implement interface functions without bodies,
+//and can optionally override functions with bodies
+MyInterface :: interface {
+	new :: fn() => This;
+	new_with_arg :: fn(arg: u8) => This;
+	increment :: fn(num: u8) => u8 {
+		arg += 1;
+		arg
+	}
+}
+
+OtherInterface :: interface {
+	other_method :: fn();
+}
+
+ThirdInterface :: interface {
+	interface_type0 :: alias; //implmenetors must define the alias
+	interface_type1 :: alias MyStruct; //you can provide a default value that you can optionally override
+}
+
+//Interfaces can impl other interfaces
+DoubleInterface :: interface: MyInterface + OtherInterface {
+	double_fn :: fn(->this);
+}
+
+//anything that implements DoubleInterface must do the same for MyInterface and OtherInterface too
+impl DoubleInterface for MyTaggedUnion {
+	new :: fn() => This {}
+	new_with_arg :: fn(arg: u8) => This {}
+	increment :: fn(num: u8) => u8 {} //this one is optional
+	other_method :: fn() {}
+	double_fn :: fn(->this) {}
+}
+
+//impl blocks
+
+//functions/methods for the struct/enum
+impl MyStruct {
+	function0 :: fn() {} //function because it doesn't start with this. This can be called with MyStruct::function0()
+
+	method0 :: fn(this) {} //method - this is copied into the function and can be called with my_struct.method0()
+						   //can also be called with MyStruct::method0(my_struct)
+
+	method1 :: fn(->this) {}//method - same as method0, but this is passed by pointer
+
+	function1 :: fn(my_struct: ->This) //must be called like MyStruct::function1(&my_struct)
+
+	method2 :: fn(const -> mut this) {} //mutability constraints still apply to function parameters, including this
+}
+
+//you can have as many impl blocks for a type as you want, and you can define them anywhere
+impl MyStruct {
+	method3 :: fn(this) {}
+}
+
+//implementing an interface
+impl MyInterface for MyStruct {
+	//you must define all functions that haven't yet been defined in the interface
+
+	new :: fn() => This {_} //you can return uninitialized data
+	new_with_arg :: fn(arg: u8) => This {_}
+
+	//you can optionally override defined functions from the interface
+	increment :: fn(num: u8) => u8 {
+		num -= 1; //don't do stupid stuff like this
+		num
+	}
+}
+//you can only implement an interface once per struct/enum
+
+//generics
+
+GenericStruct<T> {}
+generic_fn :: fn<T = Sys>() {} //you can use default types for generics
+generic_literals :: fn<num: u8, string: str, T>() {
+	//you can use num, string, and T in here
+}
+//called like generic_literals<10, "Hello", MyStruct>()
+//must be compile-time constants
+
+//generic impl blocks
+
+//The generic paramter here must be the same name as in the type definition,
+//so it must be 'T' since that's how it was defined in GenericStruct.
+impl GenericStruct<T> {}
+
+//you can have specializations for generic structs/enums
+impl GenericStruct<MyU8Enum> {}
+
+//multiple generics
+GenericStruct2<T, U> {}
+
+//Generics are written in the same order as the type definition.
+//You must use the same symbol for the generic type, but you can use an actual type for specializations.
+impl GenericStruct2<MyU8Enum, U> {}
+
+//generics also works for enums and interfaces
+
+//type constraints
+constrained_struct<T> where T impl MyInterface + OtherInterface {}
+constrained_fn :: fn<T = MyStruct, U>() => u8 where T impl MyInterface, U impl OtherInterface {}
+//if you have a default generic argument, it also needs to satisfy the where clause
+
+//dynamic dispatch
+//function parameters can be marked with "dyn" to specify that dynamic dispatch should be used
+dyn_fn :: fn(interface_object: dyn DoubleInterface) {
+	//interface objects have the representation of (->void, ->void)
+	//The first pointer points to the data in memory.
+	//The second pointer points to a vtable containing size, alignment, and a function pointer to each METHOD in the interface.
+	//There's no sense storing function pointers to functions in the interface since you could just do DoubleInterface::other_method();
+	interface_object.double_fn(); //even though interface_object is a fat pointer, it can still call functions like a normal object
+}
+
+//RAII
+//For the code that you write, RAII is opt-in.
+//Some std types will have RAII because sometimes it just makes more sense.
+//You can opt-out of RAII for the types that implement it.
+//You can opt-in to RAII for your types in general, then opt-out for individual objects
+
+//opt-in RAII
+//you simply need to implement the Raii interface for your type
+impl Raii for MyStruct {
+	//This method is automatically called on the object when it goes out of scope on the stack.
+	//It's also called when freed by an allocator.
+	free :: fn(self: ->This) {
+		//free memory or something
+	}
+}
+
+//FFI
+//Right now, I want this language to be as compatible with C as possible.
+//So it should be easy to set up bindings for C.
+
+//since function names get mangled, you need to specify the name of the function as it exists in the C library.
+external_fn :: fn() => u8 extern C name_of_c_fn;
+external_struct :: struct extern C name_of_c_struct;
+//same for regular enums and tagged-union enums.
+
+//Preprocessor
+
+comp_time_value :: 10;
+
+conditional_value := if comp_time_value == 10 {
+	//conditionally included code
+	0
+} else if comp_time_value == 0 {
+	//if all conditions can be evaluated at compile-time,
+	//the if-elses are removed by the preprocessor and only the code in the corresponding block is left.
+	//if just one of the conditions cannot be evaluated at compile-time, the entire if-else is just a normal if-else,
+	//and it will be evaluated at runtime.
+	1
+} else {
+	//expressions are not evaluted by the preprocessor.
+	//they are just the regular source code used when the condition is true, and they are evaluated normally at runtime
+	//unless they could normally be evaluated at compile-time
+	2
+};
+
+//ifelse and match work exactly the same as the preprocessor 'if' but with ifelse and match. Fallthrough rules still apply
+
+//preprocessor works with generics
+preproc_fn :: fn<T>(obj: T) {
+	if T == MyStruct {
+		//if, ifelse, and match can do this, but all conditions must be compile-time conditions
+		//obj is implicitly cast to MyStruct for this scope
+	} else if T impl MyInterface {
+		//if, ifelse, and match can do this too
+		//obj can use methods from MyInterface, if there are any, for this scope
+	}
+	match T { //in this match, we can only match with structs and enums since they are data types
+		MyStruct {
+			//obj is cast to MyStruct in this scope
+		}
+		MyRegularEnum {
+			//cast to MyRegularEnum
+		}
+		_ {} //catch-all is mandatory since you can't match against every type
+	}
+	match T { //we can't combine the two matches because T could be MyStruct and impl MyInterface at the same time
+		MyInterface {
+			//obj gets methods from interface
+		}
+		OtherInterface {
+			//obj gets methods from interface
+		}
+		_ {} //catch-all is mandatory
+	}
+	ifelse { //you can have structs/enums and interfaces at the same time
+		T == MyStruct {}
+		T impl MyInterface {}
+		_ {} //optional catch-all
+	}
+	//if you're unsure if your if/ifelse/match will be expanded by the preprocessor, you can use '#' like this:
+	#if false {} else if true {} else {}
+	#ifelse {
+		true {}
+	}
+	#match 10 {
+		10 {}
+	}
+	//putting the '#' in front of if/ifelse/match will force it to be a preprocessor control flow expression.
+	//if any conditions cannot be evaluated at compile-time, the code will not compile,
+	//and the compiler will tell you which conditions can't be evaluated.
+}
+
+comptime {
+	//#assert can be used to make runtime assertions
+	//place it in comptime to make it a compile-time assertion
+	#assert(comp_time_value == 10); //this will only compile if the condition is true
+	#assert(MyStruct impl MyInterface);
+}
+
+//macro code is not evaluated by the preprocessor, it just generates source code to be evaluated normally
+my_macro :: macro {
+	() => {} //TODO decide on a syntax for macros
+}
+//my_macro is called as #my_macro()
+//'#' must be placed before name of macro for invocation
+
+//Attributes
+//these are macros that can be applied above a type like struct, enum, interface, function, etc
+my_attr :: attr(token_stream: TokenStream) => TokenStream {
+	//token_stream represents the tokens generated by lexing the struct/enum/... that the attribute is placed above.
+	//you can parse it how you like, or not at all.
+	//the token stream returned will replace the existing source code.
+	//so "".parse()! will delete the source code.
+	"hello_world :: fn() {\"Hello, World!\"}".parse()! //this deletes the existing source code and replaces it with this function.
+}
+
+#[my_attr]
+deleted_fn :: fn() {
+	//nothing in here matters since it all gets replaced by hello_world anyway
+}
+
+//comptime
+my_comptime_variable := comptime {
+	//This doesn't use the preprocessor, and it doesn't generate source code.
+	//You can write any code here that you could write normally in any expression.
+	//File reads and writes, heap allocations, etc.
+	//All this code is executed during compilation time.
+	temp := 0;
+	for i in 1..=10 {
+		temp *= i;
+	}
+	temp //this will be baked in the binary if your code compiles
+	//if your code panics in a comptime block, then the program won't compile
+
+	//you can't just return Sys::alloc(10) because the memory was allocated at compile time and hasn't been allocated at runtime.
+	//the memory at runtime might segfault.
+	//So you need to be aware of what things you should do instead of what you can do.
+
+	//you can't nest comptime blocks.
+
+	//the preprocessor goes before comptime.
+	//this means that all macros and preprocessor things will expand and generate code inside the comptime block
+	//before the comptime is executed.
+	//this means that you can use them inside of comptime blocks, because all they do is generate source code.
+	//you can also use comptime blocks inside of macros.
+};
+
+//Multi-threading
+threading_fn :: fn() {
+	thread := std::sync::Thread::spawn(other_threading_fn); //spawning a thread returns a handle to it.
+	thread.join(); //joining a thread blocks until it finishes and returns the value, if there is one.
+}
+
+other_threading_fn :: fn() {}
+
+//Async/Await
+
+//mark functions with async to make them return a Future
+async_fn :: async fn() {
+	//you can only call await in an async context
+	other_async_fn().await();
+
+	//code is only executed when await is called
+	future := other_async_fn();
+	//other_async_fn code has not begun executing
+	future.await();
+	//other_async_fn has finished
+}
+
+other_async_fn :: async fn() {}
+
+//sync to async
+sync_fn :: fn() {
+	//from a sync context, you need to use an async runtime to begin using async code.
+	async_rt := std::sync::AsyncRuntime::new();
+	async_rt.block_on(async {
+		async_fn().await();
+
+		//spawning green threads (tasks) on the runtime
+		task := std::sync::Task::spawn(other_async_fn); //spawning a task returns a handle to it
+		task.await(); //awaiting a task joins it and returns its value, if there is one
+	});
+}
+
+/* things I'm considering still
+I am still working out the syntax for macros. I want it to have typed-arguments with regexs like rust,
+but with an Any type to make it simple like C.
+
+
+
+For macros where you can generate a variable amount of code through repetition, or macros that take a variable
+number of arguments, it would be nice to have something like this inside of macros:
+
+#for $arg in $argv {
+	//generate the code in here for each iteration, and you can use $arg in here.
+	//you wouldn't be able to use break and continue in here
+}
+*/

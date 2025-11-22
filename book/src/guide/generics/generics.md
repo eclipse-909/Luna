@@ -1,0 +1,2 @@
+# Generics
+Generics are a preprocessor feature that allows you to define associated types and values for things like structs and functions. A copy of the struct/function/whatever is made for every different associated type/value that is passed when it's created/called. This is sometimes referred to as static dispatch since you can define logic for many different types at compile-time.
