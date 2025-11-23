@@ -1,7 +1,12 @@
 [book]
 authors = ["Ethan Morton"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Luna Book"
 description = "Guide for the Luna language"
+
+[rust]
+edition = "2024"
+
+[build]
+build-dir = "../docs/book"

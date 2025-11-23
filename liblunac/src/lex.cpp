@@ -1,5 +1,6 @@
 extern "C" {
 
+#include <stdlib.h>
 #include "frontend/lex.h"
 
 DynArray(Token) lex(const str source) {

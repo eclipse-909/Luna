@@ -18,4 +18,6 @@ typedef struct {
 	};
 } AstNode;
 
+void print_ast(const AstNode* ast);
+
 #endif//AST_NODE_H

@@ -3,8 +3,6 @@
 
 #include "dyn-array.h"
 
-dyn_array_decl(uint8_t)
-
 typedef struct {
 	DynArray(uint8_t) arr;
 } String;
@@ -17,5 +15,8 @@ typedef struct {
 } str;
 
 str string_as_str(const String string);
+str str_from_cstr(const char* cstr);
+
+dyn_array_decl(str)
 
 #endif//STRING_H

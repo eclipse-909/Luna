@@ -1,0 +1,1 @@
+liblunac::compile(CompOptions::default_lib());

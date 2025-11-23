@@ -1,7 +1,0 @@
-/*
-attributes can go before:
- * Type declaration
-   - Allows Type as a parameter
-*/
-
-some_attr :: attribute() {}

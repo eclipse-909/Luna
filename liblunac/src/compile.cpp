@@ -4,6 +4,7 @@ extern "C" {
 #include "frontend/lex.h"
 #include "frontend/parse.h"
 #include "types/string.h"
+#include "types/ast-node.h"
 
 void compile(const CompOptions *options) {
 	//TODO
@@ -18,7 +19,7 @@ void compile(const CompOptions *options) {
 	const AstNode ast = parse(dyn_array_as_slice_Token(tokens));
 	dyn_array_drop_Token(tokens);
 
-	//TODO print AST
+	print_ast(&ast);
 }
 
 }

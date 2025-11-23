@@ -1,9 +1,7 @@
 #ifndef COMP_OPTIONS_H
 #define COMP_OPTIONS_H
 
-#include "string.h"
-
-dyn_array_decl(str)
+#include "types/string.h"
 
 typedef enum {
 	_fauto_inc_dec,
@@ -140,9 +138,10 @@ typedef struct  {
 	Slice(str) c_header_dirs;
 	Slice(str) lib_dirs;
 	Slice(str) libs;
-	DynArray(CompOutput) outputs;
+	Slice(CompOutput) outputs;
 } CompOptions;
 
-CompOptions CompOptions_default();
+CompOptions CompOptions_default_bin();
+CompOptions CompOptions_default_lib();
 
 #endif//COMP_OPTIONS_H
