@@ -8,7 +8,7 @@ BASEFLAGS=-std=c++20 \
 	-Wunreachable-code \
 	-pedantic \
 	-I/usr/include/llvm \
-	-I/home/eclipse/projects/Luna/liblunac/include
+	-Iliblunac/include
 
 LIBSRC=$(wildcard liblunac/src/*.cpp)
 LUNASRC=$(wildcard lunac/src/*.cpp)

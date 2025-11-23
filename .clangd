@@ -8,7 +8,7 @@ CompileFlags:
     - "-Wunreachable-code"
     - "-pedantic"
     - "-I/usr/include/llvm"
-    - "-I/home/eclipse/projects/Luna/liblunac/include"
+    - "-I../../liblunac/include"
 Diagnostics:
   MissingIncludes: Strict
   UnusedIncludes: Strict
