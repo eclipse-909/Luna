@@ -212,7 +212,6 @@ SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 3
 SkipMacroDefinitionBody: false
 SortIncludes:
-  Enabled:         true
   IgnoreCase:      true
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: false
