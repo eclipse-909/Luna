@@ -4,7 +4,7 @@
 #include "string.h"
 
 struct Type;
-dyn_array_decl(Type, struct)
+dyn_array_decl(Type, struct);
 
 typedef struct {
 	String identifier;

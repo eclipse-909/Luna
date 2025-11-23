@@ -5,7 +5,7 @@
 
 struct Type;
 struct Attribute;
-dyn_array_decl(Attribute, struct)
+dyn_array_decl(Attribute, struct);
 
 typedef struct {
 	String identifier;

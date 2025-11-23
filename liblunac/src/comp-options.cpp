@@ -3,7 +3,7 @@ extern "C" {
 #include "types/comp-options.h"
 #include "types/string.h"
 
-dyn_array_impl(CompOutput)
+dyn_array_impl(CompOutput);
 
 CompOptions CompOptions_default_bin() {
 	//TODO

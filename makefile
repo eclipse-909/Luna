@@ -42,6 +42,8 @@ BOOK_DIR = book
 BOOK_OUT = $(DOCS_DIR)/book/index.html
 BOOK_SRC = $(shell find $(BOOK_DIR)/src -name '*.md')
 
+FORMAT_FILES := $(shell find . -name '*.cpp' -o -name '*.h')
+
 # Default target
 all: liblunac lunac
 
@@ -101,3 +103,6 @@ book: $(BOOK_OUT)
 
 $(BOOK_OUT): $(BOOK_SRC)
 	~/.cargo/bin/mdbook build $(BOOK_DIR)
+
+format:
+	clang-format -i $(FORMAT_FILES)

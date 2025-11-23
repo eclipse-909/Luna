@@ -5,10 +5,10 @@
 #include <stdint.h>
 
 struct Field;
-dyn_array_decl(Field, struct)
-dyn_array_decl(Attribute)
+dyn_array_decl(Field, struct);
+dyn_array_decl(Attribute);
 struct Variant;
-dyn_array_decl(Variant, struct)
+dyn_array_decl(Variant, struct);
 
 typedef struct {
 	String identifier;

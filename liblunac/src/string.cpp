@@ -32,6 +32,6 @@ str str_from_cstr(const char* cstr) {
 	return {(uint8_t*)cstr, len};
 }
 
-dyn_array_impl(str)
+dyn_array_impl(str);
 
 }

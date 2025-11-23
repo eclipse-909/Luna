@@ -120,7 +120,7 @@ typedef enum {
 	_fprefetch_loop_arrays
 } Optimization;
 
-dyn_array_decl(Optimization)
+dyn_array_decl(Optimization);
 
 typedef struct {
 	enum {Object, StaticLib, DynLib, Bin} object_type;
@@ -131,7 +131,7 @@ typedef struct {
 	enum {x86_64_unknown_linux_gnu} target;
 } CompOutput;
 
-dyn_array_decl(CompOutput)
+dyn_array_decl(CompOutput);
 
 typedef struct  {
 	Slice(str) luna_src_dirs;

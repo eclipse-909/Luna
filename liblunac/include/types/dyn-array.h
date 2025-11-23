@@ -21,9 +21,9 @@
                                                                                       \
 	Slice(type) dyn_array_as_slice_##type(const DynArray(type) dyn_arr);              \
 	void dyn_array_drop_##type(const DynArray(type) dyn_arr);                         \
-	Slice(type) slice_from_array_##type(__VA_ARGS__ type* arr, const uintptr_t len);
+	Slice(type) slice_from_array_##type(__VA_ARGS__ type* arr, const uintptr_t len)
 
-dyn_array_decl(uint8_t)
+dyn_array_decl(uint8_t);
 
 #define dyn_array_impl(type)                                          \
 Slice(type) dyn_array_as_slice_##type(const DynArray(type) dyn_arr) { \

@@ -17,6 +17,6 @@ typedef struct {
 str string_as_str(const String string);
 str str_from_cstr(const char* cstr);
 
-dyn_array_decl(str)
+dyn_array_decl(str);
 
 #endif//STRING_H

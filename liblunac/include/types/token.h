@@ -12,6 +12,6 @@ typedef struct {
 	String value;
 } Token;
 
-dyn_array_decl(Token)
+dyn_array_decl(Token);
 
 #endif//TOKEN_H
