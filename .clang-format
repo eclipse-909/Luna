@@ -230,7 +230,6 @@ SpaceBeforeParensOptions:
   AfterFunctionDefinitionName: false
   AfterFunctionDeclarationName: false
   AfterIfMacros:   false
-  AfterNot:        true
   AfterOverloadedOperator: false
   AfterPlacementOperator: true
   AfterRequiresInClause: true
