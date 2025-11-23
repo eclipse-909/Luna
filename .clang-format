@@ -34,20 +34,6 @@ AlignConsecutiveShortCaseStatements:
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCaseColons: false
-AlignConsecutiveTableGenCondOperatorColons:
-  Enabled:         false
-  AcrossEmptyLines: false
-  AcrossComments:  false
-  AlignCompound:   false
-  AlignFunctionPointers: false
-  PadOperators:    false
-AlignConsecutiveTableGenDefinitionColons:
-  Enabled:         false
-  AcrossEmptyLines: false
-  AcrossComments:  false
-  AlignCompound:   false
-  AlignFunctionPointers: false
-  PadOperators:    false
 AlignEscapedNewlines: Left
 AlignOperands:   DontAlign
 AlignTrailingComments:
@@ -57,7 +43,6 @@ AllowAllArgumentsOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: Always
-AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
@@ -65,12 +50,10 @@ AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
-AllowShortNamespacesOnASingleLine: true
 AlwaysBreakBeforeMultilineStrings: false
 AttributeMacros:
   - __capability
 BinPackArguments: false
-BinPackLongBracedList: false
 BinPackParameters: false
 BitFieldColonSpacing: After
 BraceWrapping:
@@ -94,19 +77,15 @@ BraceWrapping:
 BracedInitializerIndentWidth: 4
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
-BreakAfterReturnType: Automatic
 BreakArrays:     false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeBraces: Attach
 BreakBeforeConceptDeclarations: Allowed
 BreakBeforeInlineASMColon: OnlyMultiline
-BreakBeforeTemplateCloser: false
 BreakBeforeTernaryOperators: true
-BreakBinaryOperations: Never
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
 BreakStringLiterals: true
-BreakTemplateDeclarations: Yes
 ColumnLimit:     80
 CommentPragmas:  '^ IWYU pragma:'
 CompactNamespaces: false
@@ -117,7 +96,6 @@ DerivePointerAlignment: false
 DisableFormat:   false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
-EnumTrailingComma: Insert
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros:
@@ -145,7 +123,6 @@ IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
-IndentExportBlock: true
 IndentExternBlock: NoIndent
 IndentGotoLabels: true
 IndentPPDirectives: BeforeHash
@@ -162,11 +139,6 @@ IntegerLiteralSeparator:
   DecimalMinDigits: 4
   Hex:             2
   HexMinDigits:    5
-KeepEmptyLines:
-  AtEndOfFile:     false
-  AtStartOfBlock:  false
-  AtStartOfFile:   false
-KeepFormFeed:    false
 LambdaBodyIndentation: Signature
 Language:        Cpp
 LineEnding:      LF
@@ -174,12 +146,10 @@ MacroBlockBegin: ''
 MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
-OneLineFormatOffRegex: ''
 PPIndentWidth: 4
 PackConstructorInitializers: CurrentLine
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakBeforeMemberAccess: 150
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 0
@@ -194,7 +164,6 @@ QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments:  false
 RemoveBracesLLVM: false
-RemoveEmptyLinesInUnwrappedLines: true
 RemoveParentheses: ReturnStatement
 RemoveSemicolon: true
 RequiresClausePosition: WithPreceding
@@ -254,4 +223,3 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - PP_STRINGIZE
   - STRINGIZE
-WrapNamespaceBodyWithEmptyLines: Always
