@@ -5,4 +5,4 @@
 
 DynArray(Token) lex(const str source);
 
-#endif//LEX_H
+#endif //LEX_H

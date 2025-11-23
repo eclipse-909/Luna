@@ -10,4 +10,4 @@ typedef struct {
 	struct Type* return_type;
 } Function;
 
-#endif//FUNCTION_H
+#endif //FUNCTION_H

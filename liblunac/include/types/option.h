@@ -5,7 +5,10 @@
 //get rid of it once other headers are included for real
 #include <stdint.h>
 
-typedef enum {Some, None} OptionTag;
+typedef enum {
+	Some,
+	None,
+} OptionTag;
 
 #define option_decl(type, ...)  \
 	typedef struct {            \
@@ -14,4 +17,4 @@ typedef enum {Some, None} OptionTag;
 	} _Option_##type
 #define Option(type) _Option_##type
 
-#endif//OPTION_H
+#endif //OPTION_H

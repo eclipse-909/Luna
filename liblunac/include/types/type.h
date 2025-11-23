@@ -2,6 +2,7 @@
 #define TYPE_H
 
 #include "function.h"
+
 #include <stdint.h>
 
 struct Field;
@@ -17,7 +18,15 @@ typedef struct {
 	uintptr_t align;
 	bool constant;
 	bool comptime;
-	enum {Fn, Struct, Enum, Union, Contract, Attr, Macro} typeType;
+	enum {
+		Fn,
+		Struct,
+		Enum,
+		Union,
+		Contract,
+		Attr,
+		Macro,
+	} typeType;
 	union {
 		Function function;
 		DynArray(Field) fields;
@@ -29,4 +38,4 @@ typedef struct {
 	DynArray(Type) contracts;
 } Type;
 
-#endif//TYPE_H
+#endif //TYPE_H

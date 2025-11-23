@@ -20,4 +20,4 @@ typedef struct {
 
 void print_ast(const AstNode* ast);
 
-#endif//AST_NODE_H
+#endif //AST_NODE_H

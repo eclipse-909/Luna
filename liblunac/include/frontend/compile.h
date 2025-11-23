@@ -5,4 +5,4 @@
 
 void compile(const CompOptions* options);
 
-#endif//COMPILE_H
+#endif //COMPILE_H

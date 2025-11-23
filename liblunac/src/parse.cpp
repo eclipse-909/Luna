@@ -6,5 +6,4 @@ AstNode parse(const Slice(Token) tokens) {
 	//TODO
 	return {};
 }
-
 }

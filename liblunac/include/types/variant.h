@@ -11,4 +11,4 @@
 
 #define Variant(type) _Variant_##type
 
-#endif//VARIANT_H
+#endif //VARIANT_H

@@ -85,7 +85,7 @@ typedef enum {
 	_foptimize_strlen,
 	_fpartial_inlining,
 	_fpeephole2,
-	_freorder_blocks_algorithm,//=stc
+	_freorder_blocks_algorithm, //=stc
 	_freorder_blocks_and_partition,
 	_freorder_functions,
 	_frerun_cse_after_loop,
@@ -103,7 +103,7 @@ typedef enum {
 	_ftree_switch_conversion,
 	_ftree_tail_merge,
 	_ftree_vrp,
-	_fvect_cost_model,//=very_cheap
+	_fvect_cost_model, //=very_cheap
 	_fgcse_after_reload,
 	_fipa_cp_clone,
 	_floop_interchange,
@@ -117,23 +117,30 @@ typedef enum {
 	_funswitch_loops,
 	//_fvect_cost_model,//=dynamic
 	_fversion_loops_for_strides,
-	_fprefetch_loop_arrays
+	_fprefetch_loop_arrays,
 } Optimization;
 
 dyn_array_decl(Optimization);
 
 typedef struct {
-	enum {Object, StaticLib, DynLib, Bin} object_type;
+	enum {
+		Object,
+		StaticLib,
+		DynLib,
+		Bin,
+	} object_type;
 	Slice(Optimization) optimizations;
 	bool emit_llvm;
 	Slice(str) assembler_args;
 	Slice(str) linker_args;
-	enum {x86_64_unknown_linux_gnu} target;
+	enum {
+		x86_64_unknown_linux_gnu,
+	} target;
 } CompOutput;
 
 dyn_array_decl(CompOutput);
 
-typedef struct  {
+typedef struct {
 	Slice(str) luna_src_dirs;
 	Slice(str) c_header_dirs;
 	Slice(str) lib_dirs;
@@ -144,4 +151,4 @@ typedef struct  {
 CompOptions CompOptions_default_bin();
 CompOptions CompOptions_default_lib();
 
-#endif//COMP_OPTIONS_H
+#endif //COMP_OPTIONS_H

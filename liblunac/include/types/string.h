@@ -19,4 +19,4 @@ str str_from_cstr(const char* cstr);
 
 dyn_array_decl(str);
 
-#endif//STRING_H
+#endif //STRING_H

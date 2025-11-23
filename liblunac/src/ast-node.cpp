@@ -5,5 +5,4 @@ extern "C" {
 void print_ast(const AstNode* ast) {
 	//TODO
 }
-
 }

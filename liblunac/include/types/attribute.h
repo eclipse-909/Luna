@@ -12,4 +12,4 @@ typedef struct {
 	DynArray(Type) runtime_params;
 } Attribute;
 
-#endif//ATTRIBUTE_H
+#endif //ATTRIBUTE_H
