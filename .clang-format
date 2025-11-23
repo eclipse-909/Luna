@@ -215,7 +215,6 @@ SortIncludes: CaseInsensitive
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
-SpaceAfterOperatorKeyword: true
 SpaceAfterTemplateKeyword: false
 SpaceAroundPointerQualifiers: Before
 SpaceBeforeAssignmentOperators: true
