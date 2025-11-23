@@ -27,7 +27,7 @@ CPPFLAGS = $(BASEFLAGS) -g -O0
 OUTPUT = $(OUTPUT_DEBUG)
 endif
 
-TESTOUT = $(OUTPUT)/tests
+TESTOUT = $(OUTPUT_DEBUG)/tests
 TEST_CPP = $(wildcard $(TESTDIR)/*.cpp)
 TEST_SH  = $(wildcard $(TESTDIR)/*.sh)
 TEST_BIN = $(patsubst $(TESTDIR)/%.cpp,$(TESTOUT)/%,$(TEST_CPP))
@@ -84,18 +84,18 @@ $(TESTOUT):
 
 # build each C++ test program, linking against liblunac
 $(TESTOUT)/%: $(TESTDIR)/%.cpp liblunac | $(TESTOUT)
-	$(CPP) $(CPPFLAGS) -o $@ $< -L$(OUTPUT) -llunac
+	$(CPP) $(CPPFLAGS) -o $@ $< -L$(OUTPUT_DEBUG) -llunac -Wl,-rpath,'$$ORIGIN/..'
 
 # test target
 test: debug $(TEST_BIN) liblunac
-	@echo "Running C++ tests"
-	@for t in $(TEST_BIN); do \
-		echo "[$$t]"; $$t; \
-	done
-	@echo "Running shell tests"
 	chmod u+x tests/*.sh
+	@echo -e "\n\nRunning C++ tests:"
+	@for t in $(TEST_BIN); do \
+		$$t && echo "[$$t] SUCCESS" || echo "[$$t] FAILED"; \
+	done
+	@echo -e "\nRunning shell tests:"
 	@for s in $(TEST_SH); do \
-		echo "[$$s]"; bash $$s; \
+		bash $$s && echo "[$$s] SUCCESS" || echo "[$$s] FAILED"; \
 	done
 
 # build book
