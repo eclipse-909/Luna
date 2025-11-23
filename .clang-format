@@ -211,8 +211,7 @@ RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 3
 SkipMacroDefinitionBody: false
-SortIncludes:
-  IgnoreCase:      true
+SortIncludes: CaseInsensitive
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
