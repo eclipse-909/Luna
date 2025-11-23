@@ -78,7 +78,7 @@ AttributeMacros:
   - __capability
 BinPackArguments: false
 BinPackLongBracedList: false
-BinPackParameters: OnePerLine
+BinPackParameters: false
 BitFieldColonSpacing: After
 BraceWrapping:
   AfterCaseLabel:  false

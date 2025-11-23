@@ -18,7 +18,9 @@ jobs:
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y clang make
       - name: Check Formatting
-        run: clang-format --dry-run --Werror $(find . -name '*.cpp' -o -name '*.h')
+        run: |
+          clang-format --version
+          clang-format --dry-run --Werror $(find . -name '*.cpp' -o -name '*.h')
 
   build:
     name: Build

@@ -7,21 +7,21 @@
 #define DynArray(type) _DynArray_##type
 #define Slice(type) _Slice_##type
 
-#define dyn_array_decl(type, ...)                                           \
-	typedef struct {                                                        \
-		__VA_ARGS__ type* ptr;                                              \
-		uintptr_t len;                                                      \
-		uintptr_t cap;                                                      \
-	} _DynArray_##type;                                                     \
-                                                                            \
-	typedef struct {                                                        \
-		__VA_ARGS__ type* ptr;                                              \
-		uintptr_t len;                                                      \
-	} _Slice_##type;                                                        \
-                                                                            \
-	Slice(type) dyn_array_as_slice_##type(const DynArray(type) dyn_arr);    \
-	void dyn_array_drop_##type(const DynArray(type) dyn_arr);               \
-	Slice(type)                                                             \
+#define dyn_array_decl(type, ...)                                        \
+	typedef struct {                                                     \
+		__VA_ARGS__ type* ptr;                                           \
+		uintptr_t len;                                                   \
+		uintptr_t cap;                                                   \
+	} _DynArray_##type;                                                  \
+                                                                         \
+	typedef struct {                                                     \
+		__VA_ARGS__ type* ptr;                                           \
+		uintptr_t len;                                                   \
+	} _Slice_##type;                                                     \
+                                                                         \
+	Slice(type) dyn_array_as_slice_##type(const DynArray(type) dyn_arr); \
+	void dyn_array_drop_##type(const DynArray(type) dyn_arr);            \
+	Slice(type)                                                          \
 		slice_from_array_##type(__VA_ARGS__ type* arr, const uintptr_t len)
 
 dyn_array_decl(uint8_t);
